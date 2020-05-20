@@ -1,7 +1,7 @@
 package com.sandy.mydaggerbase.network
 
 import com.sandy.mydaggerbase.models.NewsMainModel
-import io.reactivex.Observable
+import io.reactivex.rxjava3.core.Observable
 import retrofit2.http.GET
 import retrofit2.http.Query
 

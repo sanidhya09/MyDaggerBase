@@ -9,10 +9,10 @@ import com.sandy.mydaggerbase.database.NewsArticlesDao
 import com.sandy.mydaggerbase.models.NewsMainModel
 import com.sandy.mydaggerbase.models.NewsRequestModel
 import com.sandy.mydaggerbase.network.NewsApi
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 class NewsViewModel(
     var newsArticlesDao: NewsArticlesDao,
