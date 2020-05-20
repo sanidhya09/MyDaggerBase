@@ -4,15 +4,14 @@ import android.util.Log
 import android.view.View
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.liveData
 import com.sandy.mydaggerbase.R
 import com.sandy.mydaggerbase.database.NewsArticlesDao
 import com.sandy.mydaggerbase.models.NewsMainModel
 import com.sandy.mydaggerbase.models.NewsRequestModel
 import com.sandy.mydaggerbase.network.NewsApi
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.disposables.Disposable
-import io.reactivex.rxjava3.schedulers.Schedulers
+import com.sandy.mydaggerbase.utility.Resource
+import kotlinx.coroutines.Dispatchers
 
 class NewsViewModel(
     var newsArticlesDao: NewsArticlesDao,
@@ -20,7 +19,6 @@ class NewsViewModel(
     var newsRequestModel: NewsRequestModel
 ) : ViewModel() {
 
-    private lateinit var subscription: Disposable
     val errorMessage: MutableLiveData<Int> = MutableLiveData()
 
     val newsListAdapter: NewsListAdapter = NewsListAdapter()
@@ -28,59 +26,67 @@ class NewsViewModel(
 
     val errorClickListener = View.OnClickListener { loadTopHeadlines() }
 
-    init {
-        loadTopHeadlines()
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        subscription.dispose()
-    }
-
-    private fun loadTopHeadlines() {
-
-        subscription = Observable.fromCallable { newsArticlesDao.newsArticlesList }
-            .concatMap { dbNewsList ->
-                if (dbNewsList.isEmpty())
-                    newsApi.getTopHeadlines(
+    fun getTopHeadlines() = liveData(Dispatchers.IO) {
+        emit(Resource.loading(data = null))
+        try {
+            emit(
+                Resource.success(
+                    data = newsApi.getTopHeadlinesSuspended(
                         newsRequestModel.country,
                         newsRequestModel.category,
                         newsRequestModel.apiKey
                     )
-                        .concatMap { newsMainModelFromApi ->
-                            newsArticlesDao.insertAll(*newsMainModelFromApi.articles.toTypedArray())
-                            Observable.just(newsMainModelFromApi)
-                        }
-                else {
-                    val newsMainModelFromDb = NewsMainModel("ok", dbNewsList.size, dbNewsList)
-                    Observable.just(newsMainModelFromDb)
-                }
-            }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnSubscribe { onRetrieveStart() }
-            .doOnTerminate { onRetrieveFinish() }
-            .subscribe(
-                { result -> onRetrieveSuccess(result) },
-                { onRetrieveError() }
+                )
             )
+        } catch (exception: Exception) {
+            emit(Resource.error(data = null, message = exception.message ?: "Error Occurred!"))
+        }
     }
 
-    private fun onRetrieveStart() {
+    private fun loadTopHeadlines() {
+//        val topHeadlines: LiveData<NewsMainModel> = getTopHeadlines()
+//        if (topHeadlines.value != null) {
+//            val value = topHeadlines.value!!
+//
+//            onRetrieveSuccess(value)
+//        }
+
+//        subscription = Observable.fromCallable { newsArticlesDao.newsArticlesList }
+//            .concatMap { dbNewsList ->
+//                if (dbNewsList.isEmpty()) {
+//                    //val topHeadlines = getTopHeadlines()
+//                    //newsArticlesDao.insertAll(*topHeadlines.value!!.articles.toTypedArray())
+//                    Observable.just(topHeadlines.value!!)
+//                } else {
+//                    val newsMainModelFromDb = NewsMainModel("ok", dbNewsList.size, dbNewsList)
+//                    Observable.just(newsMainModelFromDb)
+//                }
+//            }
+//            .subscribeOn(Schedulers.io())
+//            .observeOn(AndroidSchedulers.mainThread())
+//            .doOnSubscribe { onRetrieveStart() }
+//            .doOnTerminate { onRetrieveFinish() }
+//            .subscribe(
+//                { result -> onRetrieveSuccess(result) },
+//                { onRetrieveError() }
+//            )
+    }
+
+     fun onRetrieveStart() {
         loadingVisibility.value = View.VISIBLE
         errorMessage.value = null
     }
 
-    private fun onRetrieveFinish() {
+     fun onRetrieveFinish() {
         loadingVisibility.value = View.GONE
     }
 
-    private fun onRetrieveSuccess(newsMainModel: NewsMainModel) {
+     fun onRetrieveSuccess(newsMainModel: NewsMainModel) {
         Log.i("newsMainModel", "newsMainModel::${newsMainModel.status}")
         newsListAdapter.updateNewsList(newsMainModel.articles)
     }
 
-    private fun onRetrieveError() {
+     fun onRetrieveError() {
         errorMessage.value = R.string.api_news_error
     }
 }

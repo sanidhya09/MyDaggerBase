@@ -18,6 +18,7 @@ import com.sandy.mydaggerbase.models.NewsRequestModel
 import com.sandy.mydaggerbase.network.NewsApi
 import com.sandy.mydaggerbase.ui.NewsViewModel
 import com.sandy.mydaggerbase.ui.ViewModelFactory
+import com.sandy.mydaggerbase.utility.Status
 import javax.inject.Inject
 
 class MainActivity : AppCompatActivity() {
@@ -60,6 +61,31 @@ class MainActivity : AppCompatActivity() {
         viewModel.errorMessage.observe(this, Observer { errorMessage ->
             if (errorMessage != null) showError(errorMessage) else hideError()
         })
+
+        viewModel.getTopHeadlines().observe(this, Observer {
+            it?.let { resource ->
+                when (resource.status) {
+                    Status.SUCCESS -> {
+                        viewModel.onRetrieveFinish()
+                        resource.data?.let { newsMainModel ->
+                            viewModel.onRetrieveSuccess(
+                                newsMainModel
+                            )
+                        }
+                    }
+                    Status.ERROR -> {
+                        viewModel.onRetrieveFinish()
+                        viewModel.onRetrieveError()
+                    }
+                    Status.LOADING -> {
+                        viewModel.onRetrieveStart()
+                    }
+                }
+
+            }
+
+        })
+
         binding.viewModel = viewModel
     }
 

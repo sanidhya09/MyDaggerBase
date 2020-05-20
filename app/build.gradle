@@ -68,7 +68,11 @@ dependencies {
     implementation "com.android.support.constraint:constraint-layout:1.1.3"
 
     // LiveData & ViewModel
-    implementation "android.arch.lifecycle:extensions:$lifecycle_version"
+    //LifeCycle
+    implementation 'androidx.lifecycle:lifecycle-common:2.2.0'
+    implementation 'androidx.lifecycle:lifecycle-runtime:2.2.0'
+    implementation 'android.arch.lifecycle:extensions:2.2.0'
+    implementation 'androidx.lifecycle:lifecycle-livedata-ktx:2.2.0'
 
     // Room
     implementation "android.arch.persistence.room:runtime:$room_version"
@@ -76,7 +80,6 @@ dependencies {
 
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
-    implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofit_version"
     implementation "com.squareup.retrofit2:converter-moshi:$retrofit_version"
     implementation "com.squareup.okhttp3:logging-interceptor:3.11.0"
 
@@ -97,4 +100,5 @@ dependencies {
 
     //kotlin coroutines
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.7"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.0'
 }
