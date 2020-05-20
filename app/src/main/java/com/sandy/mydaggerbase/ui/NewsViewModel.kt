@@ -43,7 +43,7 @@ class NewsViewModel(
             .concatMap { dbNewsList ->
                 if (dbNewsList.isEmpty())
                     newsApi.getTopHeadlines(
-                        newsRequestModel.category,
+                        newsRequestModel.country,
                         newsRequestModel.category,
                         newsRequestModel.apiKey
                     )
